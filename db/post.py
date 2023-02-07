@@ -18,3 +18,6 @@ def create_post(request: PostBase, db: Session):
     db.commit()
     db.refresh(post)
     return post
+
+def get_all_posts(db: Session):
+    return db.query(Post).all()
