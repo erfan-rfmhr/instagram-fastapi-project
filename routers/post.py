@@ -7,7 +7,12 @@ from schemas.post import PostBase, PostDisplay
 
 router = APIRouter(prefix="/post", tags=["post"])
 
-# create user router
+# create user endpoint
 @router.post('/create', response_model=PostDisplay)
 def create_post(post: PostBase, db: Session = Depends(get_db)):
     return db_post.create_post(post, db)
+
+# get posts
+@router.get("/get-all", response_model=list[PostDisplay])
+def get_posts(db: Session = Depends(get_db)):
+    return db_post.get_all_posts(db)
