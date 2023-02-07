@@ -1,3 +1,6 @@
+# staticfiles
+uploaded-images/*
+
 # database
 *.db
 
