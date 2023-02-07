@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, UploadFile, File, status
+from fastapi.responses import JSONResponse
 from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
 import secrets
@@ -21,17 +22,26 @@ def get_posts(db: Session = Depends(get_db)):
     return db_post.get_all_posts(db)
 
 # upload file
-@router.post("/create-by-upload-image")
+@router.post(
+    "/create-by-upload-image",
+    response_class=JSONResponse,
+    responses={
+        415:{"content":{"application/json":{"example":"File type must be jpeg or png"}}, "description":"Just jpeg and png files are allowed"},
+        200:{"content":{"application/json":{"example":"file.png"}}, "description":"Uploaded file name in static folder"},
+    }
+)
 def upload_post(file: UploadFile = File(...), db: Session = Depends(get_db)):
     if not file.content_type in ("image/jpeg", ("image/png")):
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail="File type must be jpeg or png"
+            detail="File type must be jpeg or png",
         )
     
     new_name = secrets.token_hex(8)
     _, file_ext = file.filename.split('.')
-    filename = new_name + file_ext
+    filename = new_name + '.' + file_ext
     
     with open(f"uploaded-images/{filename}", 'wb') as buffer:
         shutil.copyfileobj(file.file, buffer)
+        
+    return filename
