@@ -23,7 +23,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
         access_token = login_manager.create_access_token(
             data={"sub": user.username}
         )
-        response = JSONResponse(content={"access_token": access_token, "token_type": "bearer"})
+        response = JSONResponse(content={"access-token": access_token, "token_type": "bearer"})
         login_manager.set_cookie(response=response, token=access_token)
         return response
     else:
