@@ -140,6 +140,8 @@ celerybeat.pid
 *.sage.py
 
 # Environments
+Pipfile
+Pipfile.lock
 .env
 .venv
 env/
