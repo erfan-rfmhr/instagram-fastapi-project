@@ -14,3 +14,6 @@ def create_user(request: UserBase, db: Session):
     db.commit()
     db.refresh(user)
     return user
+
+def get_user_by_username(username: str, db: Session):
+    return db.query(User).filter(User.username == username).first()
