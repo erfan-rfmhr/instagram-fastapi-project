@@ -1,26 +1,28 @@
-from fastapi import APIRouter, Depends, UploadFile, File, status
-from fastapi.responses import JSONResponse
-from fastapi.exceptions import HTTPException
-from sqlalchemy.orm import Session
 import secrets
 import shutil
 
+from fastapi import APIRouter, Depends, File, UploadFile, status
+from fastapi.exceptions import HTTPException
+from fastapi.responses import JSONResponse
+from sqlalchemy.orm import Session
+
+from auth import login_manager
 from db import post as db_post
 from db.database import get_db
 from schemas.post import PostBase, PostDisplay
 
 router = APIRouter(prefix="/post", tags=["post"])
 
-# create post endpoint
-@router.post('/create-by-url', response_model=PostDisplay)
-def create_post(post: PostBase, db: Session = Depends(get_db)):
-    return db_post.create_post(post, db)
 
 # get posts
 @router.get("/get-all", response_model=list[PostDisplay])
-def get_posts(db: Session = Depends(get_db)):
+def get_posts(db: Session = Depends(get_db), current_user = Depends(login_manager)):
     return db_post.get_all_posts(db)
 
+# create post endpoint
+@router.post('/create-by-url', response_model=PostDisplay)
+def create_post(post: PostBase, db: Session = Depends(get_db), current_user = Depends(login_manager)):
+    return db_post.create_post(post, db)
 # upload file
 @router.post(
     "/create-by-upload-image",
@@ -30,7 +32,7 @@ def get_posts(db: Session = Depends(get_db)):
         200:{"content":{"application/json":{"example":"file.png"}}, "description":"Uploaded file name in static folder"},
     }
 )
-def upload_post(file: UploadFile = File(...), db: Session = Depends(get_db)):
+def upload_post(file: UploadFile = File(...), db: Session = Depends(get_db), current_user = Depends(login_manager)):
     if not file.content_type in ("image/jpeg", ("image/png")):
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
